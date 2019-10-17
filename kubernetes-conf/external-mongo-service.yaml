@@ -1,0 +1,41 @@
+#https://cloud.google.com/blog/products/gcp/kubernetes-best-practices-mapping-external-services
+---
+# you can use mongo url inside pod as 
+# 'mongodb://mongo:27017,mongo:27018,mongo:27019/?replicaSet=rs0'
+---
+kind: Service
+apiVersion: v1
+metadata:
+ name: mongo
+spec:
+ ports:
+ - name: primary
+   port: 27017  # receive traffic from pod on this port and route to target port 
+   targetPort: 27017 # endpoint port
+ - name: secondary1
+   port: 27018
+   targetPort: 27018
+ - name: secondary2
+   port: 27019
+   targetPort: 27019
+ - name: node
+   port: 8888
+   targetPort: 8090
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+ name: mongo
+subsets:
+ - addresses:
+     - ip: 192.168.99.1
+   ports:
+     - name: primary
+       port: 27017
+     - name: secondary1
+       port: 27018
+     - name: secondary2
+       port: 27019
+     - name: node
+       port: 8090
+#access inside your cluster as "mongo:2017"
